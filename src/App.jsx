@@ -6,7 +6,7 @@ import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base64 } from 'multiformats/bases/base64'
-import { Readable } from'stream'
+import { Readable } from 'stream'
 
 function App() {
   const [carFile, setCarFile] = useState(null)
@@ -19,28 +19,30 @@ function App() {
         return null;
       }
       console.log('CAR object created:', car); // Log the car object
-  
-     const reader = file.stream().getReader() 
-     let offset = 0
-     let cid = null
-       
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        if (value) {
-        const bytes = raw.encode(value)
-          const hash = await sha256.digest(bytes)
-          const cid = CID.create(1, raw.code, hash)
-          console.log('CID: ' + cid.toString())
-         }
-      } 
+
+      const reader = file.stream().getReader()
+      let offset = 0
+      const cid = async () => {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (value) {
+            console.log(value)
+            const bytes = raw.encode(value)
+            const hash = await sha256.digest(bytes)
+            return CID.create(1, raw.code, hash)
+            console.log('CID: ' + cid.toString())
+          }
+        }
+      }
+
       const { writer, out } = await CarWriter.create([cid])
       Readable.from(out).pipe(fs.createWriteStream('example.car'))
-    
+
       // store a new block, creates a new file entry in the CAR archive
       await writer.put({ cid, bytes })
       await writer.close()
-    
+
       const inStream = fs.createReadStream('example.car')
       // read and parse the entire stream in one go, this will cache the contents of
       // the car in memory so is not suitable for large files.
@@ -76,7 +78,7 @@ function App() {
         console.error('CAR blocks are empty');
         return;
       } */
-      
+
       const cid = car.blocks[0].cid.toString(); // Access the CID from the car object
       setCarFile(cid); // Set carFile with the CID value
     } catch (error) {
