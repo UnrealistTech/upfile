@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ipld/car": "^5.3.0",
+    "@web3-storage/w3up-client": "^13.0.0",
     "FileSaver": "^0.10.0",
     "jest": "^29.7.0",
     "multiformats": "^13.1.0",
